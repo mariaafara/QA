@@ -2,9 +2,9 @@ from milvus import *
 from QA.config import MILVUS_HOST, MILVUS_PORT, SEAR_PARM, TOP_K#, collection_param, search_param, top_k
 import sys
 
-def milvus_client():
+def milvus_client(host=MILVUS_HOST, port=MILVUS_PORT):
     try:
-        milvus = Milvus(host=MILVUS_HOST, port=MILVUS_PORT)
+        milvus = Milvus(host=host, port=port)
         return milvus
     except Exception as e:
         print("Milvus client error:", e)

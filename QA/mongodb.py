@@ -9,8 +9,8 @@ def mongodb_client():
         print("Mongo db client error:", e)
 
 
-def create_database(client):
-    return client["QA"]
+# def create_database(client):
+#     return client["QA"]
 
 
 def get_collection(database, coll_name):
