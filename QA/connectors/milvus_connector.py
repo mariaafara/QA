@@ -1,5 +1,4 @@
 from milvus import *
-from QA.config import MILVUS_HOST, MILVUS_PORT, SEAR_PARM, TOP_K#, collection_param, search_param, top_k
 
 
 class MilvusConnector:
@@ -9,12 +8,13 @@ class MilvusConnector:
         self.client = self.milvus_client(host, port)
         #TODO: create collection
 
-    def milvus_client(self, host=MILVUS_HOST, port=MILVUS_PORT):
+    def milvus_client(self, host, port):
         try:
             milvus = Milvus(host=host, port=port)
             return milvus
         except Exception as e:
             print("Milvus client error:", e)
+            raise e
 
     def create_collection(self):
         try:
@@ -49,14 +49,20 @@ class MilvusConnector:
         "either delete single or multiple entities by id or ids, in any case the ids must be a list"
         self.client.delete_entity_by_id('demo_films', ids)
 
-    def get_similar_question(self, question_query):
-        status, results = self.search(question_query)
+    def get_similar_question(self, question_query, top_k, search_parm):
+        status, results = self.search(question_query, top_k, search_parm)
 
         return results
 
-    def search(self, vec):
+    def search(self, vec, top_k, search_params):
         try:
-            status, results = self.client.search(collection_name=self.collection_name, query_records=vec, top_k=TOP_K, params=SEAR_PARM)
+            status, results = self.client.search(collection_name=self.collection_name, query_records=vec, top_k=top_k, params=search_params)
             return status, results
         except Exception as e:
             print("Milvus search error:", e)
+
+    def drop_milvus_collection(self):
+        try:
+            status = self.client.drop_collection(collection_name=self.collection_name)
+        except Exception as e:
+            print("Milvus drop table error:", e)

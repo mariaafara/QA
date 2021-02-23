@@ -1,25 +1,30 @@
 from bert_serving.client import BertClient
-from QA.connectors import mongo_connector, milvus_connector
+from connectors import MongoConnector, MilvusConnector
 import pickle as pkl
 import numpy as np
 import logging
 
 class QAManager:
     def __init__(self, mongo_host, mongo_port, mongo_username, mongo_password,
-                 milvus_host, milvus_port, bert_ip, bert_port, bert_port_out):
+                 milvus_host, milvus_port, bert_ip, bert_port, bert_port_out, collection_name):
 
         self.bc = BertClient(ip=bert_ip,
                              port=bert_port,
                              port_out=bert_port_out,
                              check_length=False)
 
-        self.mongo = mongo_connector(host=mongo_host,
+        self.mongo = MongoConnector(host=mongo_host,
                                      port=mongo_port,
                                      username=mongo_username,
-                                     password=mongo_password)
+                                     password=mongo_password,
+                                    collection_name=collection_name)
 
-        self.milvus = milvus_connector(milvus_host,
-                                       milvus_port)
+        self.milvus = MilvusConnector(milvus_host,
+                                       milvus_port,
+                                      collection_name)
+    def create_milvus_collection(self):
+        self.milvus.create_collection()
+        self.milvus.create_index()
 
     def read_data(self, fname_path):
         data = pkl.load(open(fname_path,"rb"))
@@ -52,12 +57,12 @@ class QAManager:
         self.mongo.delete(ids)
         print("The data is deleted successful from MongoDB.")
 
-    def get_answer(self, question):
+    def get_answer(self, question, top_k, search_parm):
         query_data = [question]
         vectors = self.bc.encode(query_data)
         query_list = self.normalize_vec(vectors)
         logging.info("start search in milvus...")
-        results = self.milvus.get_similar_question(query_list)
+        results = self.milvus.get_similar_question(query_list, top_k, search_parm)
         if not results:
             return "No data in the database."
 
@@ -78,3 +83,6 @@ class QAManager:
             return {'status': True, 'msg': output}
         else:
             return {'status': False, 'msg': 'No similar questions in the database'}
+
+    def drop_milvus_collection(self):
+        self.milvus.drop_milvus_collection()

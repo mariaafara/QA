@@ -1,8 +1,8 @@
 from bert_serving.client import BertClient
-from QA.milvus_ import milvus_client, drop_milvus_table
-from QA.insert_questions import load_data
-from QA.mongodb import mongodb_client, create_database, get_collection
-from QA.get_answer import get_similar_question
+from drafts.milvus_ import milvus_client, drop_milvus_table
+from drafts.insert_questions import load_data
+from drafts.mongodb import mongodb_client, create_database, get_collection
+from drafts.get_answer import get_similar_question
 from QA.config import DEFAULT_TABLE
 
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     drop_milvus_table(DEFAULT_TABLE, milvus_client)
     database = create_database(mongodb_client)
     answers_collection = get_collection(database, "answers")
-    load_data("./data.pkl", milvus_client, bc, answers_collection)
+    load_data("../data.pkl", milvus_client, bc, answers_collection)
 
     while True:
         print("please enter a question:")

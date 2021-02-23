@@ -8,7 +8,7 @@ class MongoConnector:
         self.database = self.client["QA"]
         self.collection = self.database[self.collection_name]
 
-    def mongodb_client(self, host="localhost", port=27017, username="root", password="password"):
+    def mongodb_client(self, host, port, username, password):
         try:
             mongo_client = MongoClient(host=host, port=port, username=username, password=password)
             return mongo_client
@@ -35,7 +35,10 @@ class MongoConnector:
     #     self.collection.deleteOne({"_id": id})
 
     def delete(self, ids):
-        self.collection.deleteMany({"_id": {"#in": ids}})
+        ids = [str(i) for i in ids]
+        self.collection.remove({"_id": {"#in": ids}})
 
-    def search_collection(self, ids):
-        return list(self.collection.find({"_id": {"$in": ids}}))
+    def search(self, ids):
+        output = list(self.collection.find({"_id": {"$in": ids}}))
+        print(output)
+        return output
