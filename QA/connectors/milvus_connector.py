@@ -2,11 +2,11 @@ from milvus import *
 
 
 class MilvusConnector:
+    """A class that manages all the operations related to milvus"""
     def __init__(self, host, port, collection_name):
 
         self.collection_name = collection_name
         self.client = self.milvus_client(host, port)
-        #TODO: create collection
 
     def milvus_client(self, host, port):
         try:

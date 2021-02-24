@@ -4,10 +4,13 @@ import pickle as pkl
 import numpy as np
 import logging
 
-class QAManager:
-    def __init__(self, mongo_host, mongo_port, mongo_username, mongo_password,
-                 milvus_host, milvus_port, bert_ip, bert_port, bert_port_out, collection_name):
 
+class QAManager:
+    def __init__(self,
+                 mongo_host, mongo_port, mongo_username, mongo_password,
+                 milvus_host, milvus_port, bert_ip, bert_port, bert_port_out,
+                 database_name, collection_name):
+        print(bert_ip, bert_port, bert_port_out)
         self.bc = BertClient(ip=bert_ip,
                              port=bert_port,
                              port_out=bert_port_out,
@@ -17,23 +20,20 @@ class QAManager:
                                      port=mongo_port,
                                      username=mongo_username,
                                      password=mongo_password,
+                                    database_name=database_name,
                                     collection_name=collection_name)
 
         self.milvus = MilvusConnector(milvus_host,
                                        milvus_port,
                                       collection_name)
-    def create_milvus_collection(self):
-        self.milvus.create_collection()
-        self.milvus.create_index()
 
-    def read_data(self, fname_path):
-        data = pkl.load(open(fname_path,"rb"))
-        question_data = data["Question"].tolist()[:50]
-        answer_data = data["Answer"].tolist()[:50]
-        print(len(question_data),len(answer_data))
-        return question_data, answer_data
 
     def normalize_vec(self, vec_list):
+        """Method that normalizes question(s) vector(s).
+
+        :param vec_list:
+        :return:
+        """
         question_vec = []
         for vec in vec_list:
             sqrt_square_sum = np.sqrt(np.sum(vec**2))
@@ -41,7 +41,15 @@ class QAManager:
             question_vec.append(vec)
         return question_vec
 
-    def insert(self, question_data, answer_data):
+    def insert(self, insert_query):
+        """Method that inserts pair(s) of question(s) answer(s) into Milvus and MongoDb.
+
+        :param insert_query: List of dictionaries in the format: [{"question": "answer"}]
+        :return:
+        """
+
+        question_data = [ele.question for ele in insert_query]
+        answer_data = [ele.answer for ele in insert_query]
         question_vecs = self.bc.encode(question_data)
         print("The question data  is encoded by Bert successfully.")
         question_vecs = self.normalize_vec(question_vecs)
@@ -52,12 +60,24 @@ class QAManager:
         print("The data is inserted into MongoDB successfully.")
 
     def delete(self, ids):
+        """Method that deletes question(s) answer(s) pair(s) based on their id(s) in the database.
+
+        :param ids: List of ids.
+        :return:
+        """
         self.milvus.delete(ids)
         print("The data is deleted successful from milvus.")
         self.mongo.delete(ids)
         print("The data is deleted successful from MongoDB.")
 
     def get_answer(self, question, top_k, search_parm):
+        """Method that search for an answer in a DataBase.
+
+        :param question: The question of which needs to be answered.
+        :param top_k: Number of top answers returned.
+        :param search_parm:
+        :return: top_k answers found in database.
+        """
         query_data = [question]
         vectors = self.bc.encode(query_data)
         query_list = self.normalize_vec(vectors)
