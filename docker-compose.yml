@@ -1,0 +1,38 @@
+version: '3.3'
+
+services:
+  
+  bert-server:
+    image: bert_serving
+    volumes:
+    - ./cased_L-12_H-768_A-12:/model
+    command:
+      - "1"
+    ports:
+      - 5555:5555
+      - 5556:5556
+  milvus:
+    image: milvusdb/milvus:0.10.5-cpu-d010621-4eda95
+    ports:
+      - 19530:19530
+      - 19121:19121
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: QA
+    ports:
+    - 27017:27017
+  admin-mongo:
+    image: adicom/admin-mongo
+    links:
+      - mongo
+    ports:
+    - 1234:1234
+    environment:
+      CONN_NAME: mongo
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_HOST: mongo

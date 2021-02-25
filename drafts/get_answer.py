@@ -1,8 +1,8 @@
 import logging
-from QA.milvus_ import milvus_search
+from drafts.milvus_ import milvus_search
 from QA.config import DEFAULT_TABLE
-from QA.mongodb import search_collection
-from QA.insert_questions import normalize_vec
+from drafts.mongodb import search_collection
+from drafts.insert_questions import normalize_vec
 
 
 def get_similar_question(question, collection, milvus_client, bc):

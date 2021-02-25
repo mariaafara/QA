@@ -1,6 +1,6 @@
 from QA.config import DEFAULT_TABLE
-from QA.mongodb import insert_data
-from QA.milvus_ import has_table, create_table, milvus_insert, create_index
+from drafts.mongodb import insert_data
+from drafts.milvus_ import has_table, create_table, milvus_insert, create_index
 import pickle as pkl
 import numpy as np
 
