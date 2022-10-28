@@ -12,7 +12,6 @@ def mongodb_client():
 # def create_database(client):
 #     return client["QA"]
 
-
 def get_collection(database, coll_name):
     return database[coll_name]
 
